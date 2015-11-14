@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1447475154 source:/home/voldemarich/CodeBlocksProjects/messengerserver/main.cpp
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<iostream>
+	<cstring>
+	<cstdlib>
+	<pthread.h>
+	<unistd.h>
+	"mbedtls/net.h"
+	"mbedtls/ssl.h"
+	"mbedtls/entropy.h"
+	"mbedtls/ctr_drbg.h"
+	"mbedtls/debug.h"
+
+1447469400 source:/home/voldemarich/CodeBlocksProjects/messengerserver/utils.cpp
+	<iostream>
+
