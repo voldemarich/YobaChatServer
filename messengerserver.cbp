@@ -12,11 +12,14 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++11" />
 					<Add option="-g" />
+					<Add directory="lib/json" />
 				</Compiler>
 				<Linker>
 					<Add library="mbedtls" />
 					<Add library="pthread" />
+					<Add directory="lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -29,13 +32,19 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="pthread" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.cpp" />
+		<Unit filename="lib/json/json-forwards.h" />
+		<Unit filename="lib/json/json.h" />
+		<Unit filename="lib/jsoncpp.cpp" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/utils.cpp" />
+		<Unit filename="src/yobaprotocol.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

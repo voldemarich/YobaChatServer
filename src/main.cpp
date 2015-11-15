@@ -3,15 +3,9 @@
 #include <netdb.h>
 #include <iostream>
 #include <cstring>
-#include <cstdlib>
 #include <pthread.h>
 #include <unistd.h>
-#include "mbedtls/net.h"
-#include "mbedtls/ssl.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/debug.h"
-
+#include <vector>
 
 #define MAXCON 64
 #define PORTUSED "4444"
@@ -24,12 +18,16 @@ struct addrinfo hints, *res;
 struct sockaddr_storage theiraddr;
 socklen_t addrsize;
 int myserversocket, mynewsocket;
-pthread_t threads[MAXCON];
-int conns[MAXCON];
+vector<int> conns;
+
+void closeconn(int connid)
+{
+    cout << "Connection #" << connid << " is closing. \n";
+    close(connid);
+}
 
 
-
-void *command_listener(void *arg)
+void *server_console_listener(void *arg)
 {
     while(1)
     {
@@ -50,13 +48,26 @@ void *init_comm_thread(void *arg)
 {
     int connID = *(int*)arg;
     cout << "Smb connected with the connid " << connID << "\n";
-    char l[2048];
     while(1)
     {
-        /*if(!recv(connID, &l, sizeof l, 0))
+        char len[32];
+        memset(len, 0, sizeof len);
+        int rsvalrecv = recv(connID, &len, sizeof len, 0);
+        if(!rsvalrecv)
         {
-            cout << "Connection #" << connID << " is closing. \n";
-            close(connID);
+            closeconn(connID);
+            pthread_exit(NULL);
+        }
+        string slen (len);
+        int instrlen = atoi(slen.c_str());
+        if(instrlen == 0) continue;
+        cout << "Strlen accepted is: " << instrlen << "\n";
+        char* l = new char[instrlen];
+        memset(l, 0, sizeof &l);
+        int rsstrrecv = recv(connID, l, instrlen, 0);
+        if(!rsstrrecv)
+        {
+            closeconn(connID);
             return 0;
         }
         string a (l);
@@ -64,14 +75,11 @@ void *init_comm_thread(void *arg)
         {
             cout << "Connection #" << connID << " is closing. \n";
             close(connID);
-            return 0;
-        }*/
-        cout << "Connid #" << connID << " said: " << a;
-        //string n;
+            pthread_exit(NULL);
+        }
+        cout << "Connid #" << connID << " said: " << a << "\n";
         string n = (a + " - that's what you've said to me faggot \n");
-        //n = a + " - that's what you've said to me faggot \n";
         send(connID, n.c_str(), n.length(), 0);
-        memset(l, 0, sizeof l);
     }
 }
 
@@ -100,16 +108,15 @@ int main()
     }
 
     addrsize = sizeof theiraddr;
-    int curcon = 0;
-    pthread_create(&threads[curcon], NULL, command_listener, &myserversocket);
-    conns[curcon] = myserversocket;
-    curcon++;
+    pthread_t newthread;
+    conns.push_back(myserversocket);
+    pthread_create(&newthread, NULL, server_console_listener, &myserversocket);
     while(1)
     {
         mynewsocket = accept(myserversocket, (sockaddr*)&theiraddr, &addrsize);
-        conns[curcon] = mynewsocket;
-        pthread_create(&threads[curcon], NULL, init_comm_thread, &mynewsocket);
-        curcon++;
+        conns.push_back(mynewsocket);
+        pthread_t newthread;
+        pthread_create(&newthread, NULL, init_comm_thread, &mynewsocket);
     }
 
 

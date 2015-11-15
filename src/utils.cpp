@@ -2,6 +2,7 @@
 
 using namespace std;
 
-string formatstr(string a){
+string formatstr(string a)
+{
 
 }
