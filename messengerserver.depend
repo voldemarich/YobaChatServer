@@ -20,18 +20,14 @@
 1447545104 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/utils.cpp
 	<iostream>
 
-1447545107 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/main.cpp
-	<sys/types.h>
-	<sys/socket.h>
-	<netdb.h>
-	<iostream>
-	<cstring>
-	<pthread.h>
-	<unistd.h>
+1447669588 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/main.cpp
 	<vector>
-
-1447545230 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/yobaprotocol.cpp
 	<string>
+	"prsockets.hpp"
+
+1447667976 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/yobaprotocol.cpp
+	<string>
+	<map>
 	"json.h"
 
 1447541745 source:/home/voldemarich/CodeBlocksProjects/messengerserver/jsoncpp.cpp
@@ -203,4 +199,34 @@
 	<math.h>
 	<cmath>
 	<float.h>
+
+1447668748 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/prsockets.cpp
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<iostream>
+	<cstring>
+	<pthread.h>
+	<unistd.h>
+	<vector>
+
+1447669185 /home/voldemarich/CodeBlocksProjects/messengerserver/src/prsockets.cpp
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<iostream>
+	<cstring>
+	<pthread.h>
+	<unistd.h>
+	<vector>
+
+1447710369 /home/voldemarich/CodeBlocksProjects/messengerserver/include/prsockets.hpp
+	<sys/types.h>
+	<sys/socket.h>
+	<netdb.h>
+	<iostream>
+	<cstring>
+	<pthread.h>
+	<unistd.h>
+	<vector>
 
