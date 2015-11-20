@@ -22,11 +22,13 @@ public:
 
     void start()
     {
+    if(socket_.available() < 1){
         async_read(socket_, data_,
                   boost::asio::transfer_at_least(socket_.available()),
                                 boost::bind(&session::handle_read, this,
                                             boost::asio::placeholders::error,
                                             boost::asio::placeholders::bytes_transferred));
+        }
     }
 
 private:
@@ -38,7 +40,7 @@ private:
             string a = streamBufferToString(&data_);
             if(a.length()>0){
                 cout << a << endl;
-                string lal = a + " - hui\n";
+                string lal = a + " - nyasha\n";
                 readStringToStreamBuffer(&lal, &data_);
             }
             boost::asio::async_write(socket_, data_,
