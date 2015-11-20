@@ -1,15 +1,14 @@
-#include <vector>
-#include <string>
-#include "prsockets.hpp"
+#include <iostream>
+#include "boost/asio.hpp"
+#include "prsockets_boost.hpp"
 
 using namespace std;
 
 const string exitst = "exit";
 
-vector<int> conns;
-
-
 int main()
 {
-    initsock(&conns);
+
+    initsrv();
+    return 0;
 }

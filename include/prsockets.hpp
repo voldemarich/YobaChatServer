@@ -10,7 +10,7 @@
 #define EXITCOMM "exit"
 #define MAXCON 64
 #define PORTUSED "4444"
-#define PACKET 1024
+#define PACKET 512
 #define MAX_PACKETS_PER_TRANSACTION 30
 
 using namespace std;
@@ -50,16 +50,23 @@ void *init_comm_thread(void *arg)
     int connID = *(int*)arg;
     cout << "Smb connected with the connid " << connID << "\n";
     char len[64];
+    char * buffer = new char[1];
     while(1){
-        char * buffer = new char[1];
-        if(!recv(connID, &len, sizeof len, 0)) closeconn(connID);
+        bzero(&len, strlen(len));
+        if(!recv(connID, &len, 32, 0)) closeconn(connID);
         int sz;
         if(!(sz = atoi(len))) continue;
-        buffer = (char*)malloc((sizeof (char))*(int)(sz/PACKET)*PACKET);
+        buffer = (char*)malloc((sizeof (char))*PACKET);
+        bzero(buffer, sizeof *buffer);
+        string a = "";
+        bzero(buffer, PACKET);
         if(!recv(connID, buffer, sz, 0)) closeconn(connID);
-        cout << buffer << "\n";
-        send(connID, buffer, sz, 0);
-    }
+        a += buffer;
+        cout << a << "\n";
+        send(connID, a.c_str(), a.length(), 0);
+        }
+        pthread_exit(NULL);
+        //free(buffer);
 }
 
 int initsock(vector<int>* conns)

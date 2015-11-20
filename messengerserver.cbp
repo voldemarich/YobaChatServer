@@ -16,11 +16,12 @@
 					<Add option="-g" />
 					<Add directory="lib/json" />
 					<Add directory="include" />
+					<Add directory="../../myinstall/boost_1_59_0" />
 				</Compiler>
 				<Linker>
-					<Add library="mbedtls" />
-					<Add library="pthread" />
+					<Add library="libboost_system" />
 					<Add directory="lib" />
+					<Add directory="../../myinstall/boost_1_59_0/stage/lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -41,6 +42,7 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="include/prsockets.hpp" />
+		<Unit filename="include/prsockets_boost.hpp" />
 		<Unit filename="include/utils.hpp" />
 		<Unit filename="include/yobaprotocol.hpp" />
 		<Unit filename="lib/json/json-forwards.h" />

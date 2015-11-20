@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const string TYPED[] = {"ACK", "FAIL", "ISALIVE", ""};
+const map TYPED[] = {"ACK", "FAIL", "ISALIVE", ""};
 struct transaction{
     string id, transtype, typed;
     string usertoken;
