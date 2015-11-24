@@ -13,13 +13,3 @@ void readStringToStreamBuffer(string* s, boost::asio::streambuf* n){
     ostream os(n);
     os << *s;
 }
-
-/*void wipeStreamBuffer(boost::asio::streambuf* n){
-    n->consume(n->in_avail());
-    n->pubsync();
-}
-
-void wipeStreamBuffer(boost::asio::streambuf* n, size_t sz){
-    n->consume(sz);
-}
-*/

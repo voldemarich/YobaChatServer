@@ -49,7 +49,6 @@ void *init_comm_thread(void *arg)
 {
     int connID = *(int*)arg;
     cout << "Smb connected with the connid " << connID << "\n";
-    char len[64];
     char * buffer = new char[1];
     while(1){
         bzero(&len, strlen(len));

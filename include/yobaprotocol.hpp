@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const map TYPED[] = {"ACK", "FAIL", "ISALIVE", ""};
+const map TYPED = {"ACK", "FAIL", "ISALIVE", ""};
 struct transaction{
     string id, transtype, typed;
     string usertoken;
@@ -21,6 +21,7 @@ string genFail(){
 
 string getResponce(string request)
 {
+
     Json::Value req;
     Json::Reader reader;
     if(!reader.parse(request, req, false)){

@@ -5,6 +5,11 @@
 #include <boost/asio.hpp>
 #include "utils.hpp"
 
+#include "base64_tools.hpp"
+#include <boost/algorithm/string/replace.hpp>
+
+#define stopseq "~~//END//~~\n"
+
 using boost::asio::ip::tcp;
 
 class session
@@ -23,8 +28,14 @@ public:
     void start()
     {
     if(socket_.available() < 1){
-        async_read(socket_, data_,
+        /*async_read(socket_, data_,
                   boost::asio::transfer_at_least(socket_.available()),
+                                boost::bind(&session::handle_read, this,
+                                            boost::asio::placeholders::error,
+                                            boost::asio::placeholders::bytes_transferred));
+        */
+        async_read_until(socket_, data_,
+                  stopseq,
                                 boost::bind(&session::handle_read, this,
                                             boost::asio::placeholders::error,
                                             boost::asio::placeholders::bytes_transferred));
@@ -40,7 +51,12 @@ private:
             string a = streamBufferToString(&data_);
             if(a.length()>0){
                 cout << a << endl;
-                string lal = a + " - nyasha\n";
+                boost::replace_all(a, stopseq, "");
+                boost::replace_all(a, " ", "");
+                boost::replace_all(a, "\n", "");
+                string lal = decode64(a);
+                cout << lal << endl;
+                lal = encode64(lal+" is nyasha by design!\n")+stopseq;
                 readStringToStreamBuffer(&lal, &data_);
             }
             boost::asio::async_write(socket_, data_,
@@ -58,8 +74,14 @@ private:
     {
         if (!error)
         {
-             boost::asio::async_read(socket_, data_,
+             /*boost::asio::async_read(socket_, data_,
                   boost::asio::transfer_at_least(socket_.available()),
+                                boost::bind(&session::handle_read, this,
+                                            boost::asio::placeholders::error,
+                                            boost::asio::placeholders::bytes_transferred));
+            */
+            async_read_until(socket_, data_,
+                  stopseq,
                                 boost::bind(&session::handle_read, this,
                                             boost::asio::placeholders::error,
                                             boost::asio::placeholders::bytes_transferred));
