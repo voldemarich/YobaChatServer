@@ -21,8 +21,12 @@ bool validate_transaction(Document & jsondoc)
     valresult &= jsondoc.HasMember("typed");
     valresult &= jsondoc.HasMember("usertoken");
     valresult &= jsondoc.HasMember("data");
-    valresult &= jsondoc["id"].IsString();
-    valresult &= jsondoc["typed"].IsString();
+    if(valresult)
+    {
+        valresult &= jsondoc["id"].IsString();
+        valresult &= jsondoc["typed"].IsString();
+        valresult &= jsondoc["data"].IsArray();
+    }
     return valresult;
 }
 
@@ -31,16 +35,18 @@ string prepareToSend(string w)
     return encode64(w)+stopseq;
 }
 
-string domToString(Document & dom){
+string domToString(Document & dom)
+{
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
     dom.Accept(writer);
     return buffer.GetString();
 }
 
-string genToken(Document & request){}
+string genToken(Document & request) {}
 
-string genAck(Document & request){
+string genAck(Document & request)
+{
     Document resp;
     resp.SetObject();
     Document::AllocatorType& alloc = resp.GetAllocator();
@@ -51,7 +57,7 @@ string genAck(Document & request){
     return prepareToSend(domToString(resp));
 }
 
-string genFail(Document & request)
+string genFail(Document & request, string reason, int errorcode)
 {
     Document resp;
     resp.SetObject();
@@ -59,11 +65,15 @@ string genFail(Document & request)
     resp.AddMember("id", Value(StringRef(request["id"].GetString())), alloc);
     resp.AddMember("typed", Value("FAIL"), alloc);
     resp.AddMember("usertoken", Value(StringRef(request["usertoken"].GetString())), alloc);
-    resp.AddMember("data", Value().SetObject(), alloc);
+    Value * data = new Value();
+    data->SetObject();
+    data->AddMember("errordescr", Value(StringRef(reason.c_str())), alloc);
+    data->AddMember("errorcode", Value(errorcode), alloc);
+    resp.AddMember("data", *data, alloc);
     return prepareToSend(domToString(resp));
 }
 
-string genFail()
+string genFail(string reason, int errorcode)
 {
     Document resp;
     resp.SetObject();
@@ -71,22 +81,28 @@ string genFail()
     resp.AddMember("id", Value(StringRef(genRandomAlphanumericStr(IDSIZE).c_str())), alloc);
     resp.AddMember("typed", Value("FAIL"), alloc);
     resp.AddMember("usertoken", Value(""), alloc);
-    resp.AddMember("data", Value().SetObject(), alloc);
+    Value * data = new Value();
+    data->SetObject();
+    data->AddMember("errordescr", Value(StringRef(reason.c_str())), alloc);
+    data->AddMember("errorcode", Value(errorcode), alloc);
+    resp.AddMember("data", *data, alloc);
     return prepareToSend(domToString(resp));
 }
 
-string genMessages(Document & request){}
+string genMessages(Document & request) {}
 
-string typeGenSwitch(Document & request)
+string typeGenSwitch(Document & request, DbService * dbcon)
 {
     string typed = request["typed"].GetString();
     if(typed == "REG")
     {
-        if(registerUser(request)) return genToken(request);
+        if(dbcon->registerUser(request)) return genToken(request);
+        return genFail(request, "1 Registration with non-unique params", 1);
     }
     if(typed == "MSG")
     {
-        if(commitNewMessage(request)) return genAck(request);
+        if(dbcon->commitNewMessage(request)) return genAck(request);
+        return genFail(request, "2 Message malformed/db not accessible", 2);
     }
     if(typed == "AUTH") return genToken(request);
     if(typed == "HASMSG") return genMessages(request);
@@ -95,10 +111,10 @@ string typeGenSwitch(Document & request)
     if(typed == "ALV") return genAck(request);
     //to be continued
 
-    return genFail(request);
+    return genFail(request, "0 Request malformed", 0);
 }
 
-string getResponce(string request)
+string getResponce(string request, DbService * dbcon)
 {
     boost::replace_all(request, stopseq, "");
     boost::replace_all(request, " ", "");
@@ -108,12 +124,12 @@ string getResponce(string request)
         string clear_request = decode64(request);
         Document jsondoc;
         jsondoc.Parse(decode64(request).c_str());
-        if(!jsondoc.IsObject()) return genFail();
-        if(!validate_transaction(jsondoc)) return genFail();
-        return typeGenSwitch(jsondoc);
+        if(!jsondoc.IsObject()) return genFail("0 Request malformed", 0);
+        if(!validate_transaction(jsondoc)) return genFail("0 Request malformed", 0);
+        return typeGenSwitch(jsondoc, dbcon);
     }
     catch(exception e)
     {
-        return genFail();
+        return genFail("0 Request malformed", 0);
     }
 }

@@ -20,7 +20,7 @@
 1447545104 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/utils.cpp
 	<iostream>
 
-1448598643 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/main.cpp
+1448645546 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/main.cpp
 	<iostream>
 	"boost/asio.hpp"
 	"prsockets_boost.hpp"
@@ -9032,7 +9032,7 @@
 	<boost/asio/detail/push_options.hpp>
 	<boost/asio/detail/pop_options.hpp>
 
-1448597155 /home/voldemarich/CodeBlocksProjects/messengerserver/include/prsockets_boost.hpp
+1448646077 /home/voldemarich/CodeBlocksProjects/messengerserver/include/prsockets_boost.hpp
 	<cstdlib>
 	<iostream>
 	<vector>
@@ -10925,7 +10925,7 @@
 	<boost/range/value_type.hpp>
 	<boost/range/as_literal.hpp>
 
-1448598918 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobaprotocol.hpp
+1448653898 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobaprotocol.hpp
 	<string>
 	<map>
 	<boost/algorithm/string/replace.hpp>
@@ -11080,8 +11080,11 @@
 1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/strfunc.h
 	"../rapidjson.h"
 
-1448598277 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobadbservice.hpp
+1448653919 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobadbservice.hpp
 	<rapidjson/document.h>
+	<mysql_connection.h>
+	<mysql_driver.h>
+	<string>
 	"utils.hpp"
 
 1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/stringbuffer.h

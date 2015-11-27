@@ -11,9 +11,10 @@ using boost::asio::ip::tcp;
 class session
 {
 public:
-    session(boost::asio::io_service& io_service)
+    session(boost::asio::io_service& io_service, DbService * dbcon)
         : socket_(io_service)
     {
+        this->dbcon = dbcon;
     }
 
     tcp::socket& socket()
@@ -23,12 +24,13 @@ public:
 
     void start()
     {
-    if(socket_.available() < 1){
-        async_read_until(socket_, data_,
-                  stopseq,
-                                boost::bind(&session::handle_read, this,
-                                            boost::asio::placeholders::error,
-                                            boost::asio::placeholders::bytes_transferred));
+        if(socket_.available() < 1)
+        {
+            async_read_until(socket_, data_,
+                             stopseq,
+                             boost::bind(&session::handle_read, this,
+                                         boost::asio::placeholders::error,
+                                         boost::asio::placeholders::bytes_transferred));
         }
     }
 
@@ -39,8 +41,9 @@ private:
         if (!error)
         {
             string request = streamBufferToString(&data_);
-            if(request.length()>0){
-                string responce = getResponce(request);
+            if(request.length()>0)
+            {
+                string responce = getResponce(request, dbcon);
                 readStringToStreamBuffer(&responce, &data_);
             }
             boost::asio::async_write(socket_, data_,
@@ -60,10 +63,10 @@ private:
         if (!error)
         {
             async_read_until(socket_, data_,
-                  stopseq,
-                                boost::bind(&session::handle_read, this,
-                                            boost::asio::placeholders::error,
-                                            boost::asio::placeholders::bytes_transferred));
+                             stopseq,
+                             boost::bind(&session::handle_read, this,
+                                         boost::asio::placeholders::error,
+                                         boost::asio::placeholders::bytes_transferred));
         }
         else
         {
@@ -74,22 +77,24 @@ private:
 
     tcp::socket socket_;
     boost::asio::streambuf data_;
+    DbService * dbcon;
 };
 
 class server
 {
 public:
-    server(boost::asio::io_service& io_service, short port)
+    server(boost::asio::io_service& io_service, short port, DbService * dbcon)
         : io_service_(io_service),
           acceptor_(io_service, tcp::endpoint(tcp::v4(), port))
     {
+        this->dbcon = dbcon;
         start_accept();
     }
 
 private:
     void start_accept()
     {
-        session* new_session = new session(io_service_);
+        session* new_session = new session(io_service_, dbcon);
         acceptor_.async_accept(new_session->socket(),
                                boost::bind(&server::handle_accept, this, new_session,
                                            boost::asio::placeholders::error));
@@ -112,6 +117,7 @@ private:
 
     boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
+    DbService * dbcon;
 };
 
 int initsrv()
@@ -119,8 +125,8 @@ int initsrv()
     try
     {
         boost::asio::io_service io_service;
-
-        server s(io_service, 4444);
+        DbService * dbserv = new DbService("tcp://127.0.0.1:3306", "messenger", "qwerty123", "messengerserver");
+        server s(io_service, 4444, dbserv);
 
         io_service.run();
     }
