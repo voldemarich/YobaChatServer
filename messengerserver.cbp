@@ -20,10 +20,10 @@
 					<Add directory="../../myinstall/rapidjson-master/include" />
 				</Compiler>
 				<Linker>
+					<Add library="libboost_random" />
+					<Add library="libmysqlcppconn" />
 					<Add library="libboost_system" />
-					<Add library="boost_regex" />
-					<Add library="boost_random" />
-					<Add directory="../../myinstall/boost_1_59_0/stage/lib" />
+					<Add directory="/usr/local/lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">

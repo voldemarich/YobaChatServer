@@ -43,49 +43,47 @@ string domToString(Document & dom)
     return buffer.GetString();
 }
 
-string genToken(Document & request) {}
-
-string genAck(Document & request)
+Document formBasicProtocolDoc(string id, string type, string usertoken)
 {
     Document resp;
     resp.SetObject();
     Document::AllocatorType& alloc = resp.GetAllocator();
-    resp.AddMember("id", Value(StringRef(request["id"].GetString())), alloc);
-    resp.AddMember("typed", Value("ACK"), alloc);
-    resp.AddMember("usertoken", Value(StringRef(request["usertoken"].GetString())), alloc);
-    resp.AddMember("data", Value().SetObject(), alloc);
+    resp.AddMember("id", Value(StringRef(id.c_str())), alloc);
+    resp.AddMember("typed", Value(StringRef(type.c_str())), alloc);
+    resp.AddMember("usertoken", Value(StringRef(usertoken.c_str())), alloc);
+    resp.AddMember("data", Value().SetArray(), alloc);
+    return resp;
+}
+
+string genToken(Document & request) {}
+
+string genAck(Document & request)
+{
+    Document resp = formBasicProtocolDoc(request["id"].GetString(), "ACK", request["usertoken"].GetString());
     return prepareToSend(domToString(resp));
 }
 
 string genFail(Document & request, string reason, int errorcode)
 {
-    Document resp;
-    resp.SetObject();
+    Document resp = formBasicProtocolDoc(request["id"].GetString(), "FAIL", request["usertoken"].GetString());
     Document::AllocatorType& alloc = resp.GetAllocator();
-    resp.AddMember("id", Value(StringRef(request["id"].GetString())), alloc);
-    resp.AddMember("typed", Value("FAIL"), alloc);
-    resp.AddMember("usertoken", Value(StringRef(request["usertoken"].GetString())), alloc);
     Value * data = new Value();
     data->SetObject();
     data->AddMember("errordescr", Value(StringRef(reason.c_str())), alloc);
     data->AddMember("errorcode", Value(errorcode), alloc);
-    resp.AddMember("data", *data, alloc);
+    resp["data"].PushBack(*data, alloc);
     return prepareToSend(domToString(resp));
 }
 
 string genFail(string reason, int errorcode)
 {
-    Document resp;
-    resp.SetObject();
+    Document resp = formBasicProtocolDoc(genRandomAlphanumericStr(32), "FAIL", "");;
     Document::AllocatorType& alloc = resp.GetAllocator();
-    resp.AddMember("id", Value(StringRef(genRandomAlphanumericStr(IDSIZE).c_str())), alloc);
-    resp.AddMember("typed", Value("FAIL"), alloc);
-    resp.AddMember("usertoken", Value(""), alloc);
     Value * data = new Value();
     data->SetObject();
     data->AddMember("errordescr", Value(StringRef(reason.c_str())), alloc);
     data->AddMember("errorcode", Value(errorcode), alloc);
-    resp.AddMember("data", *data, alloc);
+    resp["data"].PushBack(*data, alloc);
     return prepareToSend(domToString(resp));
 }
 
@@ -96,12 +94,34 @@ string typeGenSwitch(Document & request, DbService * dbcon)
     string typed = request["typed"].GetString();
     if(typed == "REG")
     {
-        if(dbcon->registerUser(request)) return genToken(request);
+        bool validation = true;
+        validation &= (request["data"].Size() > 0);
+        if(validation)
+        {
+            validation &= request["data"][0].HasMember("login");
+            validation &= request["data"][0].HasMember("password");
+            validation &= request["data"][0].HasMember("email");
+        }
+        if(validation)
+        {
+            if(dbcon->registerUser(request)) return genAck(request); //return genToken(request);
+        }
         return genFail(request, "1 Registration with non-unique params", 1);
     }
     if(typed == "MSG")
     {
-        if(dbcon->commitNewMessage(request)) return genAck(request);
+        bool validation = true;
+        validation &= request["data"].Size() > 0;
+        if(validation)
+        {
+            validation &= request["data"][0].HasMember("sender");
+            validation &= request["data"][0].HasMember("receiver");
+            validation &= request["data"][0].HasMember("message");
+        }
+        if(validation)
+        {
+            if(dbcon->commitNewMessage(request)) return genAck(request);
+        }
         return genFail(request, "2 Message malformed/db not accessible", 2);
     }
     if(typed == "AUTH") return genToken(request);
