@@ -8,7 +8,6 @@ const string exitst = "exit";
 
 int main()
 {
-
     initsrv();
     return 0;
 }

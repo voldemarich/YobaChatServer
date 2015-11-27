@@ -11,17 +11,18 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option projectCompilerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-std=c++11" />
 					<Add option="-g" />
-					<Add directory="lib/json" />
 					<Add directory="include" />
 					<Add directory="../../myinstall/boost_1_59_0" />
+					<Add directory="../../myinstall/rapidjson-master/include" />
 				</Compiler>
 				<Linker>
 					<Add library="libboost_system" />
 					<Add library="boost_regex" />
-					<Add directory="lib" />
+					<Add library="boost_random" />
 					<Add directory="../../myinstall/boost_1_59_0/stage/lib" />
 				</Linker>
 			</Target>
@@ -46,10 +47,10 @@
 		<Unit filename="include/prsockets.hpp" />
 		<Unit filename="include/prsockets_boost.hpp" />
 		<Unit filename="include/utils.hpp" />
+		<Unit filename="include/yobadbservice.hpp" />
 		<Unit filename="include/yobaprotocol.hpp" />
 		<Unit filename="lib/json/json-forwards.h" />
 		<Unit filename="lib/json/json.h" />
-		<Unit filename="lib/jsoncpp.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />

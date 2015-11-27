@@ -20,7 +20,7 @@
 1447545104 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/utils.cpp
 	<iostream>
 
-1447860276 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/main.cpp
+1448598643 source:/home/voldemarich/CodeBlocksProjects/messengerserver/src/main.cpp
 	<iostream>
 	"boost/asio.hpp"
 	"prsockets_boost.hpp"
@@ -9032,15 +9032,13 @@
 	<boost/asio/detail/push_options.hpp>
 	<boost/asio/detail/pop_options.hpp>
 
-1448326477 /home/voldemarich/CodeBlocksProjects/messengerserver/include/prsockets_boost.hpp
+1448597155 /home/voldemarich/CodeBlocksProjects/messengerserver/include/prsockets_boost.hpp
 	<cstdlib>
 	<iostream>
 	<vector>
 	<boost/bind.hpp>
 	<boost/asio.hpp>
-	"utils.hpp"
-	"base64_tools.hpp"
-	<boost/algorithm/string/replace.hpp>
+	"yobaprotocol.hpp"
 
 1425421141 /home/voldemarich/myinstall/boost_1_59_0/boost/date_time/posix_time/posix_time.hpp
 	"boost/date_time/compiler_config.hpp"
@@ -10731,8 +10729,10 @@
 	"boost/date_time/time_parsing.hpp"
 	"boost/date_time/posix_time/posix_time_types.hpp"
 
-1448317305 /home/voldemarich/CodeBlocksProjects/messengerserver/include/utils.hpp
+1448378926 /home/voldemarich/CodeBlocksProjects/messengerserver/include/utils.hpp
 	<iostream>
+	<boost/random/random_device.hpp>
+	<boost/random/uniform_int_distribution.hpp>
 
 1423920145 /home/voldemarich/myinstall/boost_1_59_0/boost/regex.h
 	<boost/cregex.hpp>
@@ -10924,4 +10924,186 @@
 	<boost/algorithm/string/detail/sequence.hpp>
 	<boost/range/value_type.hpp>
 	<boost/range/as_literal.hpp>
+
+1448598918 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobaprotocol.hpp
+	<string>
+	<map>
+	<boost/algorithm/string/replace.hpp>
+	<rapidjson/document.h>
+	<rapidjson/stringbuffer.h>
+	<rapidjson/writer.h>
+	"base64_tools.hpp"
+	"yobadbservice.hpp"
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/random_device.hpp
+	<string>
+	<boost/config.hpp>
+	<boost/noncopyable.hpp>
+	<boost/random/detail/auto_link.hpp>
+	<boost/system/config.hpp>
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/detail/auto_link.hpp
+	<boost/config.hpp>
+	<boost/config/auto_link.hpp>
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/uniform_int_distribution.hpp
+	<iosfwd>
+	<ios>
+	<istream>
+	<boost/config.hpp>
+	<boost/limits.hpp>
+	<boost/assert.hpp>
+	<boost/random/detail/config.hpp>
+	<boost/random/detail/operators.hpp>
+	<boost/random/detail/uniform_int_float.hpp>
+	<boost/random/detail/signed_unsigned_tools.hpp>
+	<boost/type_traits/make_unsigned.hpp>
+	<boost/type_traits/is_integral.hpp>
+	<boost/mpl/bool.hpp>
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/detail/config.hpp
+	<boost/config.hpp>
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/detail/operators.hpp
+	<boost/random/detail/config.hpp>
+	<boost/detail/workaround.hpp>
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/detail/uniform_int_float.hpp
+	<boost/limits.hpp>
+	<boost/config.hpp>
+	<boost/integer.hpp>
+	<boost/random/detail/config.hpp>
+	<boost/random/detail/generator_bits.hpp>
+	<boost/random/detail/disable_warnings.hpp>
+	<boost/random/detail/enable_warnings.hpp>
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/detail/generator_bits.hpp
+	<boost/limits.hpp>
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/detail/disable_warnings.hpp
+	<boost/config.hpp>
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/detail/enable_warnings.hpp
+
+1425059085 /home/voldemarich/myinstall/boost_1_59_0/boost/random/detail/signed_unsigned_tools.hpp
+	<boost/limits.hpp>
+	<boost/config.hpp>
+	<boost/type_traits/make_unsigned.hpp>
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/document.h
+	"reader.h"
+	"internal/meta.h"
+	"internal/strfunc.h"
+	<new>
+	<string>
+	<iterator>
+	<utility>
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/reader.h
+	"rapidjson.h"
+	"encodings.h"
+	"internal/meta.h"
+	"internal/stack.h"
+	"internal/strtod.h"
+	<intrin.h>
+	<nmmintrin.h>
+	<emmintrin.h>
+	<stdexcept>
+	"rapidjson/error/error.h"
+	"rapidjson/reader.h"
+	"error/error.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/rapidjson.h
+	<cstdlib>
+	<cstring>
+	"rapidjson/..."
+	"msinttypes/stdint.h"
+	"msinttypes/inttypes.h"
+	<stdint.h>
+	<inttypes.h>
+	<endian.h>
+	"rapidjson/..."
+	<cassert>
+	"allocators.h"
+	"encodings.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/msinttypes/stdint.h
+	<stdint.h>
+	<limits.h>
+	<wchar.h>
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/msinttypes/inttypes.h
+	"stdint.h"
+	<inttypes.h>
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/allocators.h
+	"rapidjson.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/encodings.h
+	"rapidjson.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/meta.h
+	"../rapidjson.h"
+	<type_traits>
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/stack.h
+	"../rapidjson.h"
+	"swap.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/swap.h
+	"../rapidjson.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/strtod.h
+	"../rapidjson.h"
+	"ieee754.h"
+	"biginteger.h"
+	"diyfp.h"
+	"pow10.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/ieee754.h
+	"../rapidjson.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/biginteger.h
+	"../rapidjson.h"
+	<intrin.h>
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/diyfp.h
+	"../rapidjson.h"
+	<intrin.h>
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/pow10.h
+	"../rapidjson.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/error/error.h
+	"../rapidjson.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/strfunc.h
+	"../rapidjson.h"
+
+1448598277 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobadbservice.hpp
+	<rapidjson/document.h>
+	"utils.hpp"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/stringbuffer.h
+	"rapidjson.h"
+	<utility>
+	"internal/stack.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/writer.h
+	"rapidjson.h"
+	"internal/stack.h"
+	"internal/strfunc.h"
+	"internal/dtoa.h"
+	"internal/itoa.h"
+	"stringbuffer.h"
+	<new>
+	<string>
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/dtoa.h
+	"itoa.h"
+	"diyfp.h"
+	"ieee754.h"
+
+1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/itoa.h
+	"../rapidjson.h"
 
