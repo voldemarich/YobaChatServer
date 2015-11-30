@@ -8,11 +8,14 @@
 #include "yobadbservice.hpp"
 
 #define stopseq "~~//END//~~\n"
+#define SUCCESS 200
 #define IDSIZE 32
-#define TOKENSIZE 64
 
 using namespace std;
 using namespace rapidjson;
+
+const string errorcodes[] = {"0:message malformed", "1:reg with non-unique params", "2:db not accessible",
+ "3:token invalid", "4:authorization data invalid"};
 
 bool validate_transaction(Document & jsondoc)
 {
@@ -55,7 +58,11 @@ Document formBasicProtocolDoc(string id, string type, string usertoken)
     return resp;
 }
 
-string genToken(Document & request) {}
+//Todo transfer validity time
+string genToken(Document & request, string token) {
+    Document resp = formBasicProtocolDoc(request["id"].GetString(), "TOK", token);
+    return prepareToSend(domToString(resp));
+}
 
 string genAck(Document & request)
 {
@@ -91,6 +98,7 @@ string genMessages(Document & request) {}
 
 string typeGenSwitch(Document & request, DbService * dbcon)
 {
+try{
     string typed = request["typed"].GetString();
     if(typed == "REG")
     {
@@ -104,9 +112,9 @@ string typeGenSwitch(Document & request, DbService * dbcon)
         }
         if(validation)
         {
-            if(dbcon->registerUser(request)) return genAck(request); //return genToken(request);
+            dbcon->registerUser(request);
+            return genAck(request); //return genToken(request);
         }
-        return genFail(request, "1 Registration with non-unique params", 1);
     }
     if(typed == "MSG")
     {
@@ -120,18 +128,24 @@ string typeGenSwitch(Document & request, DbService * dbcon)
         }
         if(validation)
         {
-            if(dbcon->commitNewMessage(request)) return genAck(request);
+            dbcon->commitNewMessage(request);
+            return genAck(request);
         }
-        return genFail(request, "2 Message malformed/db not accessible", 2);
     }
-    if(typed == "AUTH") return genToken(request);
-    if(typed == "HASMSG") return genMessages(request);
+    if(typed == "AUTH") {
+        dbcon->authorize(request);
+        return genToken(request, dbcon->generateToken(request["data"][0]["login"].GetString()));
+    }
+    if(typed == "HASMSG")
+        return genMessages(request);
     //if(typed == "RNTOCK") {}
     //if(typed == "INVALTOCK") {}
     if(typed == "ALV") return genAck(request);
     //to be continued
-
-    return genFail(request, "0 Request malformed", 0);
+}
+catch(int e){
+    return genFail(request, errorcodes[e], e);
+    }
 }
 
 string getResponce(string request, DbService * dbcon)
@@ -144,12 +158,12 @@ string getResponce(string request, DbService * dbcon)
         string clear_request = decode64(request);
         Document jsondoc;
         jsondoc.Parse(decode64(request).c_str());
-        if(!jsondoc.IsObject()) return genFail("0 Request malformed", 0);
-        if(!validate_transaction(jsondoc)) return genFail("0 Request malformed", 0);
+        if(!jsondoc.IsObject()) return genFail(errorcodes[0], 0);
+        if(!validate_transaction(jsondoc)) return genFail(errorcodes[0], 0);
         return typeGenSwitch(jsondoc, dbcon);
     }
     catch(exception e)
     {
-        return genFail("0 Request malformed", 0);
+        return genFail(errorcodes[0], 0);
     }
 }
