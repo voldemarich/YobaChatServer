@@ -3,7 +3,7 @@
 #include <mysql_driver.h>
 #include <cppconn/prepared_statement.h>
 #include <string>
-#include <iostream>
+#include <vector>
 #include "utils.hpp"
 
 #define TOKEN_SIZE 64
@@ -60,14 +60,13 @@ public:
     bool validateTokenByName(string user, string token)
     {
         PreparedStatement * prepstmt;
-        prepstmt = conn -> prepareStatement("select ((select expiry from tokens where (userid=(select id from users where login=?) and token=?)) > now() is true) as 'res';");
+        prepstmt = conn -> prepareStatement("select ((select expiry from tokens where (userid=(select id from users where login=?) and token=?)) > now() is true) as res;");
         prepstmt->setString(1, user);
         prepstmt->setString(2, token);
         try
         {
             ResultSet * rs;
             rs = prepstmt->executeQuery();
-            int num = rs->getMetaData()->getColumnCount();
             string a = rs->getMetaData()->getColumnLabel(1);
             rs->next();
             if(rs->getBoolean(a))return true;
@@ -82,7 +81,7 @@ public:
     int validateToken(string token)
     {
         PreparedStatement * prepstmt;
-        prepstmt = conn -> prepareStatement("select (((select expiry from tokens where token=?) > now() is true) as res, (select userid from tokens where token=?) as userid);");
+        prepstmt = conn -> prepareStatement("select ((select expiry from tokens where token=?) > now() is true) as res, (select userid from tokens where token=?) as userid;");
         prepstmt->setString(1, token);
         prepstmt->setString(2, token);
         try
@@ -104,12 +103,14 @@ public:
         try
         {
             PreparedStatement * prepstmt;
-            prepstmt = conn -> prepareStatement("delete from tokens where userid=(select id from users where login=?); insert into tokens (userid, token, expiry) values ((select id from users where login=?), ?, now()+interval ? hours)");
+            prepstmt = conn -> prepareStatement("delete from tokens where userid=(select id from users where login=?);");
             prepstmt->setString(1, login);
-            prepstmt->setString(2, login);
+            prepstmt->executeUpdate();
+            prepstmt = conn->prepareStatement("insert into tokens (userid, token, expiry) values ((select id from users where login=?), ?, now()+interval ? hour);");
             string token = genRandomAlphanumericStr(TOKEN_SIZE);
-            prepstmt->setString(3, token);
-            prepstmt->setInt(4, TOKEN_VALID_TIME);
+            prepstmt->setString(1, login);
+            prepstmt->setString(2, token);
+            prepstmt->setInt(3, TOKEN_VALID_TIME);
             prepstmt->executeUpdate();
             conn->commit();
             return token;
@@ -148,39 +149,40 @@ public:
         else throw 0;
     }
 
-    Value retrievePendingMessages(Document & request)
+    vector<map<string, string>> retrievePendingMessages(Document & request)
     {
+        int recvid= validateToken(request["usertoken"].GetString());
         try
         {
-            int recvid= validateToken(request["usertoken"].GetString());
             PreparedStatement * prepstmt;
-            prepstmt = conn->prepareStatement("select senderuid, receiveruid, msg from msgs where (receiveruid=? and status=0); update msgs set status=1 where receiveruid=?;");
+            prepstmt = conn->prepareStatement("select senderuid, receiveruid, msg from msgs where (receiveruid=? and status=0);");
             prepstmt->setInt(1, recvid);
-            prepstmt->setInt(2, recvid);
             ResultSet * rs;
             rs = prepstmt->executeQuery();
+            prepstmt = conn->prepareStatement("update msgs set status=1 where receiveruid=?;"); //ATTENTION! Threading error can occur!
+            prepstmt->setInt(1, recvid);
+            prepstmt->executeUpdate();
             conn->commit();
-            Value msgarr;
-            msgarr.SetArray();
-            Value::AllocatorType alloc;
             ResultSet * namers;
-            prepstmt = conn->prepareStatement("select login from users where id=? as recvn;");
+            prepstmt = conn->prepareStatement("select login from users where id=?;");
             prepstmt->setInt(1, recvid);
             namers = prepstmt->executeQuery();
             namers->next();
-            string receiver = namers->getString("recvn");
+            string receiver = namers->getString("login");
+            vector<map<string, string>> msgs;
             while(rs->next()){
-                Value n;
-                n.SetObject();
-                prepstmt = conn->prepareStatement("select login from users where id=? as sendern;");
-                prepstmt->setInt(1, rs->getInt("senderid"));
+                map<string, string> onemsg;
+                prepstmt = conn->prepareStatement("select login from users where id=?;");
+                prepstmt->setInt(1, rs->getInt("senderuid"));
                 namers = prepstmt->executeQuery();
-                n.AddMember("sender", StringRef(namers->getString("sendern").c_str()), alloc);
-                n.AddMember("receiver", StringRef(receiver.c_str()), alloc);
-                n.AddMember("message", StringRef(rs->getString("msg").c_str()), alloc);
-                msgarr.PushBack(n, alloc);
+                namers->next();
+                onemsg.insert(make_pair("sender", namers->getString("login")));
+                onemsg.insert(make_pair("receiver", receiver));
+                onemsg.insert(make_pair("message", rs->getString("msg")));
+                //cout << namers->getString("login") << "    " << rs->getString("msg") << endl;
+                msgs.push_back(onemsg);
             }
-            return msgarr;
+            return msgs;
         }
         catch(exception e)
         {
@@ -190,10 +192,10 @@ public:
 
     void commitNewMessage(Document & request)
     {
+        validateTokenByName(request["data"][0]["sender"].GetString(), request["usertoken"].GetString());
         try
         {
             PreparedStatement * prepstmt;
-            validateTokenByName(request["data"][0]["sender"].GetString(), request["usertoken"].GetString());
             prepstmt = conn -> prepareStatement("insert into msgs (senderuid, receiveruid, msg) values ((select id from users where (login = ?)), (select id from users where (login = ?)), ?);");
             prepstmt->setString(1, request["data"][0]["sender"].GetString());
             prepstmt->setString(2, request["data"][0]["receiver"].GetString());

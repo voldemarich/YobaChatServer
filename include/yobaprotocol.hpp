@@ -94,7 +94,21 @@ string genFail(string reason, int errorcode)
     return prepareToSend(domToString(resp));
 }
 
-string genMessages(Document & request) {}
+string genMessages(Document & request, vector<map<string, string>> msgs) {
+    string typed = "MSG";
+    Document resp = formBasicProtocolDoc(request["id"].GetString(), typed, request["usertoken"].GetString());
+    for(std::vector<map<string, string>>::iterator it = msgs.begin(); it != msgs.end(); ++it) {
+        Value a;
+        a.SetObject();
+        a.AddMember("sender", StringRef((*it)["sender"].c_str()), resp.GetAllocator());
+        a.AddMember("receiver", StringRef((*it)["receiver"].c_str()), resp.GetAllocator());
+        a.AddMember("message", StringRef((*it)["message"].c_str()), resp.GetAllocator());
+        resp["data"].PushBack(a, resp.GetAllocator());
+    }
+    string a = domToString(resp);
+    std::cout << a << endl;
+    return prepareToSend(domToString(resp));
+}
 
 string typeGenSwitch(Document & request, DbService * dbcon)
 {
@@ -113,7 +127,7 @@ try{
         if(validation)
         {
             dbcon->registerUser(request);
-            return genAck(request); //return genToken(request);
+            return genToken(request, dbcon->generateToken(request["data"][0]["login"].GetString())); //return genToken(request);
         }
     }
     if(typed == "MSG")
@@ -136,12 +150,16 @@ try{
         dbcon->authorize(request);
         return genToken(request, dbcon->generateToken(request["data"][0]["login"].GetString()));
     }
-    if(typed == "HASMSG")
-        return genMessages(request);
+    if(typed == "HASMSG"){
+        //Document msgs = dbcon->retrievePendingMessages(request);
+        return genMessages(request, dbcon->retrievePendingMessages(request));
+        }
     //if(typed == "RNTOCK") {}
     //if(typed == "INVALTOCK") {}
     if(typed == "ALV") return genAck(request);
     //to be continued
+
+    throw 0;
 }
 catch(int e){
     return genFail(request, errorcodes[e], e);
