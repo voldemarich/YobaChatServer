@@ -3,6 +3,7 @@
 #include <mysql_driver.h>
 #include <cppconn/prepared_statement.h>
 #include <string>
+#include <exception>
 #include <vector>
 #include "utils.hpp"
 
@@ -53,7 +54,7 @@ public:
         }
         catch(exception e)
         {
-            return false;
+            throw 2; //todo make different exceptions processing
         }
     }
 
@@ -123,14 +124,14 @@ public:
 
     void authorize(Document & request)
     {
-        if(request["data"].Size() > 1)
+        if(request["data"].Size() > 0)
         {
             if(request["data"][0].HasMember("login") && request["data"][0].HasMember("password"))
             {
                 try
                 {
                     PreparedStatement * prepstmt;
-                    prepstmt = conn->prepareStatement("select ((select pwdhash from users where login=?) is sha1(?)) as val;");
+                    prepstmt = conn->prepareStatement("select ((select pwdhash from users where login=?) = (sha1(?) collate utf8_general_ci) is true) as val;");
                     prepstmt->setString(1, request["data"][0]["login"].GetString());
                     prepstmt->setString(2, request["data"][0]["password"].GetString());
                     ResultSet * rs;
@@ -139,7 +140,7 @@ public:
                     if(rs->getBoolean("val")) return;
                     throw 4;
                 }
-                catch(exception e)
+                catch(SQLException e)
                 {
                     throw 2;
                 }

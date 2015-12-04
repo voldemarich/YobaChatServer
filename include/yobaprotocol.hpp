@@ -1,6 +1,7 @@
 #include <string>
 #include <map>
 #include <boost/algorithm/string/replace.hpp>
+#include <cppconn/exception.h>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
