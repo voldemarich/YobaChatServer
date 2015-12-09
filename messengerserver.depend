@@ -10925,7 +10925,7 @@
 	<boost/range/value_type.hpp>
 	<boost/range/as_literal.hpp>
 
-1449243350 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobaprotocol.hpp
+1449689658 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobaprotocol.hpp
 	<string>
 	<map>
 	<boost/algorithm/string/replace.hpp>
@@ -11081,13 +11081,12 @@
 1447726319 /home/voldemarich/CodeBlocksProjects/messengerserver/include/rapidjson/internal/strfunc.h
 	"../rapidjson.h"
 
-1449245453 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobadbservice.hpp
+1449689414 /home/voldemarich/CodeBlocksProjects/messengerserver/include/yobadbservice.hpp
 	<rapidjson/document.h>
 	<mysql_connection.h>
 	<mysql_driver.h>
 	<cppconn/prepared_statement.h>
 	<string>
-	<exception>
 	<vector>
 	"utils.hpp"
 

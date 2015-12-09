@@ -11,7 +11,7 @@ id integer(64) primary key auto_increment,
 senderuid integer(64),
 receiveruid integer(64),
 msg text not null,
-datesent datetime not null,
+datereceive datetime not null,
 status bool not null default 0
 );
 

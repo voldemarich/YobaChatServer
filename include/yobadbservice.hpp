@@ -3,7 +3,6 @@
 #include <mysql_driver.h>
 #include <cppconn/prepared_statement.h>
 #include <string>
-#include <exception>
 #include <vector>
 #include "utils.hpp"
 
@@ -44,7 +43,7 @@ public:
             login = request["data"][0]["login"].GetString();
             pwd = request["data"][0]["password"].GetString();
             email = request["data"][0]["email"].GetString();
-            prepstmt = conn->prepareStatement("insert into users (login, pwdhash, email) values (?, sha1(?), ?);");
+            prepstmt = conn->prepareStatement("insert into users (login, pwdhash, email, dateregister) values (?, sha1(?), ?, now());");
             prepstmt->setString(1, login);
             prepstmt->setString(2, pwd);
             prepstmt->setString(3, email);
@@ -156,7 +155,7 @@ public:
         try
         {
             PreparedStatement * prepstmt;
-            prepstmt = conn->prepareStatement("select senderuid, receiveruid, msg from msgs where (receiveruid=? and status=0);");
+            prepstmt = conn->prepareStatement("select senderuid, receiveruid, msg, datesent from msgs where (receiveruid=? and status=0);");
             prepstmt->setInt(1, recvid);
             ResultSet * rs;
             rs = prepstmt->executeQuery();
@@ -180,9 +179,12 @@ public:
                 onemsg.insert(make_pair("sender", namers->getString("login")));
                 onemsg.insert(make_pair("receiver", receiver));
                 onemsg.insert(make_pair("message", rs->getString("msg")));
+                onemsg.insert(make_pair("datesent", rs->getString("datesent")));
                 //cout << namers->getString("login") << "    " << rs->getString("msg") << endl;
                 msgs.push_back(onemsg);
             }
+            delete rs;
+            delete namers;
             return msgs;
         }
         catch(exception e)
@@ -197,7 +199,7 @@ public:
         try
         {
             PreparedStatement * prepstmt;
-            prepstmt = conn -> prepareStatement("insert into msgs (senderuid, receiveruid, msg) values ((select id from users where (login = ?)), (select id from users where (login = ?)), ?);");
+            prepstmt = conn -> prepareStatement("insert into msgs (senderuid, receiveruid, msg, datesent) values ((select id from users where (login = ?)), (select id from users where (login = ?)), ?, now());");
             prepstmt->setString(1, request["data"][0]["sender"].GetString());
             prepstmt->setString(2, request["data"][0]["receiver"].GetString());
             prepstmt->setString(3, request["data"][0]["message"].GetString());

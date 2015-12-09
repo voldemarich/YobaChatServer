@@ -9,7 +9,6 @@
 #include "yobadbservice.hpp"
 
 #define stopseq "~~//END//~~\n"
-#define SUCCESS 200
 #define IDSIZE 32
 
 using namespace std;
@@ -104,10 +103,11 @@ string genMessages(Document & request, vector<map<string, string>> msgs) {
         a.AddMember("sender", StringRef((*it)["sender"].c_str()), resp.GetAllocator());
         a.AddMember("receiver", StringRef((*it)["receiver"].c_str()), resp.GetAllocator());
         a.AddMember("message", StringRef((*it)["message"].c_str()), resp.GetAllocator());
+        a.AddMember("datesent", StringRef((*it)["datesent"].c_str()), resp.GetAllocator());
         resp["data"].PushBack(a, resp.GetAllocator());
     }
-    string a = domToString(resp);
-    std::cout << a << endl;
+    //string a = domToString(resp); //DEBUG CODE
+    //std::cout << a << endl;
     return prepareToSend(domToString(resp));
 }
 
