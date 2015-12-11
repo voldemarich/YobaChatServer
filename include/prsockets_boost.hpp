@@ -120,19 +120,19 @@ private:
     DbService * dbcon;
 };
 
-int initsrv()
+int initsrv(int serverport, std::string dbhost, std::string dbport, std::string dbname, std::string dbuser, std::string dbpassword)
 {
     try
     {
         boost::asio::io_service io_service;
-        DbService * dbserv = new DbService("tcp://127.0.0.1:3306", "messenger", "qwerty123", "messengerserver");
+        DbService * dbserv = new DbService("tcp://"+dbhost+":"+dbport, dbuser, dbpassword, dbname);
         server s(io_service, 4444, dbserv);
 
         io_service.run();
     }
     catch (std::exception& e)
     {
-        std::cerr << "Exception: " << e.what() << "\n";
+        std::cerr << "YobaChatServer Exception: " << e.what() << "\n";
     }
     return 0;
 };
