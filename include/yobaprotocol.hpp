@@ -15,7 +15,8 @@ using namespace std;
 using namespace rapidjson;
 
 const string errorcodes[] = {"0:message malformed", "1:reg with non-unique params", "2:db not accessible",
- "3:token invalid", "4:authorization data invalid"};
+                             "3:token invalid", "4:authorization data invalid", "5:insufficient parameter length"
+                            };
 
 bool validate_transaction(Document & jsondoc)
 {
@@ -59,7 +60,8 @@ Document formBasicProtocolDoc(string id, string type, string usertoken)
 }
 
 //Todo transfer validity time
-string genToken(Document & request, string token) {
+string genToken(Document & request, string token)
+{
     Document resp = formBasicProtocolDoc(request["id"].GetString(), "TOK", token);
     return prepareToSend(domToString(resp));
 }
@@ -67,6 +69,19 @@ string genToken(Document & request, string token) {
 string genAck(Document & request)
 {
     Document resp = formBasicProtocolDoc(request["id"].GetString(), "ACK", request["usertoken"].GetString());
+    return prepareToSend(domToString(resp));
+}
+
+string genMatchusr(Document & request, vector<string> matches)
+{
+    Document resp = formBasicProtocolDoc(request["id"].GetString(), "MATCHUSR", request["usertoken"].GetString());
+    if(request["data"].Size() < 1) throw 0;
+    if(strlen(request["data"][0].GetString())<3) return prepareToSend(domToString(resp));
+    Document::AllocatorType& alloc = resp.GetAllocator();
+    for(vector<string>::iterator i = matches.begin(); i != matches.end(); ++i)
+    {
+        resp["data"].PushBack(StringRef((*i).c_str()), alloc);
+    }
     return prepareToSend(domToString(resp));
 }
 
@@ -94,10 +109,12 @@ string genFail(string reason, int errorcode)
     return prepareToSend(domToString(resp));
 }
 
-string genMessages(Document & request, vector<map<string, string>> msgs) {
+string genMessages(Document & request, vector<map<string, string>> msgs)
+{
     string typed = "MSG";
     Document resp = formBasicProtocolDoc(request["id"].GetString(), typed, request["usertoken"].GetString());
-    for(std::vector<map<string, string>>::iterator it = msgs.begin(); it != msgs.end(); ++it) {
+    for(vector<map<string, string>>::iterator it = msgs.begin(); it != msgs.end(); ++it)
+    {
         Value a;
         a.SetObject();
         a.AddMember("sender", StringRef((*it)["sender"].c_str()), resp.GetAllocator());
@@ -113,57 +130,68 @@ string genMessages(Document & request, vector<map<string, string>> msgs) {
 
 string typeGenSwitch(Document & request, DbService * dbcon)
 {
-try{
-    string typed = request["typed"].GetString();
-    if(typed == "REG")
+    try
     {
-        bool validation = true;
-        validation &= (request["data"].Size() > 0);
-        if(validation)
+        string typed = request["typed"].GetString();
+        if(typed == "REG")
         {
-            validation &= request["data"][0].HasMember("login");
-            validation &= request["data"][0].HasMember("password");
-            validation &= request["data"][0].HasMember("email");
+            bool validation = true;
+            validation &= (request["data"].Size() > 0);
+            if(validation)
+            {
+                validation &= request["data"][0].HasMember("login");
+                validation &= request["data"][0].HasMember("password");
+                validation &= request["data"][0].HasMember("email");
+            }
+            if(strlen(request["data"][0]["login"].GetString()) < 5 && strlen(request["data"][0]["email"].GetString()) < 5)
+            {
+                throw 5;
+            }
+            if(validation)
+            {
+                dbcon->registerUser(request);
+                return genToken(request, dbcon->generateToken(request["data"][0]["login"].GetString())); //return genToken(request);
+            }
         }
-        if(validation)
+        if(typed == "MSG")
         {
-            dbcon->registerUser(request);
-            return genToken(request, dbcon->generateToken(request["data"][0]["login"].GetString())); //return genToken(request);
+            bool validation = true;
+            validation &= request["data"].Size() > 0;
+            if(validation)
+            {
+                validation &= request["data"][0].HasMember("sender");
+                validation &= request["data"][0].HasMember("receiver");
+                validation &= request["data"][0].HasMember("message");
+            }
+            if(validation)
+            {
+                dbcon->commitNewMessage(request);
+                return genAck(request);
+            }
         }
-    }
-    if(typed == "MSG")
-    {
-        bool validation = true;
-        validation &= request["data"].Size() > 0;
-        if(validation)
+        if(typed == "AUTH")
         {
-            validation &= request["data"][0].HasMember("sender");
-            validation &= request["data"][0].HasMember("receiver");
-            validation &= request["data"][0].HasMember("message");
+            dbcon->authorize(request);
+            return genToken(request, dbcon->generateToken(request["data"][0]["login"].GetString()));
         }
-        if(validation)
+        if(typed == "HASMSG")
         {
-            dbcon->commitNewMessage(request);
-            return genAck(request);
+            //Document msgs = dbcon->retrievePendingMessages(request);
+            return genMessages(request, dbcon->retrievePendingMessages(request));
         }
-    }
-    if(typed == "AUTH") {
-        dbcon->authorize(request);
-        return genToken(request, dbcon->generateToken(request["data"][0]["login"].GetString()));
-    }
-    if(typed == "HASMSG"){
-        //Document msgs = dbcon->retrievePendingMessages(request);
-        return genMessages(request, dbcon->retrievePendingMessages(request));
+        //if(typed == "RNTOCK") {}
+        //if(typed == "INVALTOCK") {}
+        if(typed == "ALV") return genAck(request);
+        if(typed == "SEARCHUSR"){
+        return genMatchusr(request, dbcon->getUserMatches(request));
         }
-    //if(typed == "RNTOCK") {}
-    //if(typed == "INVALTOCK") {}
-    if(typed == "ALV") return genAck(request);
-    //to be continued
+        //to be continued
 
-    throw 0;
-}
-catch(int e){
-    return genFail(request, errorcodes[e], e);
+        throw 0;
+    }
+    catch(int e)
+    {
+        return genFail(request, errorcodes[e], e);
     }
 }
 

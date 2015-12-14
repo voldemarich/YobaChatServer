@@ -183,8 +183,6 @@ public:
                 //cout << namers->getString("login") << "    " << rs->getString("msg") << endl;
                 msgs.push_back(onemsg);
             }
-            delete rs;
-            delete namers;
             return msgs;
         }
         catch(exception e)
@@ -214,5 +212,26 @@ public:
         }
     }
 
+
+    vector<string> getUserMatches(Document & request){
+        validateToken(request["usertoken"].GetString());
+        try{
+            PreparedStatement * prepstmt;
+            prepstmt = conn -> prepareStatement("select login from users where login like ?;");
+            string tomatch = request["data"][0].GetString();
+            tomatch += "%"; //Search not only for the matchreq, but for all the str beginning with it
+            prepstmt -> setString(1, tomatch);
+            ResultSet * rs;
+            rs = prepstmt -> executeQuery();
+            vector<string> strmatch;
+            while(rs->next()){
+                strmatch.push_back(rs->getString("login"));
+            }
+            return strmatch;
+        }
+        catch(exception e){
+            throw 2;
+        }
+    }
 
 };

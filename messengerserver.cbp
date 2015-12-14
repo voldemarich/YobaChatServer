@@ -32,11 +32,16 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O2" />
+					<Add option="-march=corei7-avx" />
+					<Add option="-O3" />
+					<Add option="-std=c++11" />
+					<Add directory="include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add library="pthread" />
+					<Add library="libboost_system" />
+					<Add library="libboost_random" />
+					<Add library="libmysqlcppconn" />
 				</Linker>
 			</Target>
 		</Build>
@@ -49,8 +54,6 @@
 		<Unit filename="include/utils.hpp" />
 		<Unit filename="include/yobadbservice.hpp" />
 		<Unit filename="include/yobaprotocol.hpp" />
-		<Unit filename="lib/json/json-forwards.h" />
-		<Unit filename="lib/json/json.h" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />
