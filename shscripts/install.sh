@@ -30,5 +30,5 @@ cp restartyobaserver.sh /etc/YobaChatServer;
 ln -s /etc/YobaChatServer/startyobaserver.sh /usr/bin/yobachatserver-start; chmod +x /usr/bin/yobachatserver-start;
 ln -s /etc/YobaChatServer/stopyobaserver.sh /usr/bin/yobachatserver-stop; chmod +x /usr/bin/yobachatserver-stop;
 ln -s /etc/YobaChatServer/restartyobaserver.sh /usr/bin/yobachatserver-restart; chmod +x /usr/bin/yobachatserver-restart;
-mysql -h $dbhost -P $dbport -u $dbuser -p$password < ../sqltools/prepareDB.sql;
+mysql -h $dbhost -P $dbport -u $dbuser -p$password $dbname < ../sqltools/prepareDB.sql;
 echo "Installation done, server is configured. Now run yobachatserver-start to start the server";
