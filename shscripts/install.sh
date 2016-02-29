@@ -22,7 +22,7 @@ echo $dbhost > /etc/YobaChatServer/dbhost.cfg;
 echo $dbname > /etc/YobaChatServer/dbname.cfg;
 echo $dbport > /etc/YobaChatServer/dbport.cfg;
 echo $dbuser > /etc/YobaChatServer/dbuser.cfg;
-echo $password > /etc/YobaChatServer/dbpassword.cfg;
+echo $password > /etc/YobaChatServer/dbpass.cfg;
 echo $serverport > /etc/YobaChatServer/serverport.cfg;
 cp startyobaserver.sh /etc/YobaChatServer;
 cp stopyobaserver.sh /etc/YobaChatServer;
